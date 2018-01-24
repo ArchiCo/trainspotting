@@ -90,7 +90,7 @@ public final class TSimInterface {
 
 				if (dInfo instanceof CommandStatus)
 					commandFIFO.offer((CommandStatus) dInfo);
-
+ 
 				else if (dInfo instanceof TrainErrorEvent) {
 					TrainErrorEvent tEvent = (TrainErrorEvent) dInfo;
 					int trainId = tEvent.getTrainId();
@@ -115,7 +115,7 @@ public final class TSimInterface {
 				this.err.println(e.getMessage());
 			}
 		}
-	}
+	} 
 
 	private void reportTrainErrorEvent(TrainErrorEvent e) {
 		this.err.println(e);
