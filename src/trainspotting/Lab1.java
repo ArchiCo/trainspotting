@@ -7,16 +7,12 @@ public class Lab1 {
 	Semaphore[] semaphores = new Semaphore[6];
 	
 	/*
-	 * The given map has six critical points that trains need to mind to prevent the collision:
-	 * 2x Station lanes
-	 */
-	
-	// Semaphore 0-1: Station 1 & 2 -- blocks the switch, preventing the other train from entering the lane
-	// Semaphore 2-3: One lane passages after stations	
-	// Semaphore   4: Middle lane / fast passage
-	// Semaphore   5: Crossroads
-
-			
+	 *  The critical sections are as we discussed:
+	 *	1-2. Northern and Southern stations: the semaphore's to control the switch as to prevent the trains from entering a lane that's already occupied by a train.
+	 *	3-4. Northern and Southern single lanes that go from the station switches, 'till the middle fast lane switch: these sections are critical, because trains can't enter and pass them simultaneously without causing a collision. One train would have to wait at either side of this 'path' (either waiting on the station lane next to the switch, or in the middle lane before the crossing train passes.
+	 *	5. Middle "fast" lane: if one's occupied, then the second train needs to be redirected to the other lane. Interestingly enough, if one train passes into the 'one lane' section after crossing the switch, then the previous behavior (3-4) will be the one governing the first train's stop.
+	 *	6. Crossroad between northern train station lanes: one waits, while the other one passes.
+	 */			
 			
   public Lab1(Integer speed1, Integer speed2){
     TSimInterface tsi = TSimInterface.getInstance();
