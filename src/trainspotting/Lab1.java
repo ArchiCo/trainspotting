@@ -3,7 +3,7 @@ import TSim.*;
 import java.util.concurrent.Semaphore;
 
 public class Lab1 {
-	Semaphore[] semaphores = new Semaphore[6];
+	Semaphore[] semaphore = new Semaphore[6];
 	
 	/*
 	 *  The critical sections are as we discussed:
@@ -15,6 +15,9 @@ public class Lab1 {
 			
   public Lab1(Integer speed1, Integer speed2){
     TSimInterface tsi = TSimInterface.getInstance();
+    for (int i = 0; i < 6; i++) {
+    	semaphore[i] = new Semaphore(1);
+    }
     try {
     Train train1 = new Train(1, speed1, tsi);
 	Train train2 = new Train(2, speed2, tsi);
@@ -81,6 +84,7 @@ public class Lab1 {
 				
 				// Crossroad cases
 				case "6,7":
+					//semaphore[5].tryAcquire();
 					break;
 				case "10,7":
 					break;
