@@ -1,6 +1,7 @@
 package trainspotting;
 import java.io.IOException;
 
+import TSim.CommandException;
 import TSim.TSimInterface;
 
 public class Main {

@@ -3,7 +3,6 @@ import TSim.*;
 import java.util.concurrent.Semaphore;
 
 public class Lab1 {
-	private int maxspeed = 19;
 	Semaphore[] semaphores = new Semaphore[6];
 	
 	/*
@@ -17,33 +16,34 @@ public class Lab1 {
   public Lab1(Integer speed1, Integer speed2){
     TSimInterface tsi = TSimInterface.getInstance();
     try {
-    	
-    	Train train1 = new Train(1, tsi);
-    	Train train2 = new Train(2, tsi);
-    	train1.setSpeed(speed1);
-    	train2.setSpeed(speed2);
-    	train1.start();
-    	train2.start();
-   }
-    catch (CommandException e) {
-      e.printStackTrace();    // or only e.getMessage() for the error
-      System.exit(1);
+    Train train1 = new Train(1, speed1, tsi);
+	Train train2 = new Train(2, speed2, tsi);
+	train1.start();
+	train2.start();
+    } catch (CommandException e) {
+    	e.printStackTrace();
+    	System.exit(0);
     }
   }
   
   class Train extends Thread {
+	  private int maxSpeed = 15;
+	  private boolean traveling = true;
 	  private int trainId;
 	  private int speed;
 	  private TSimInterface tsi;
 	  
-	  public Train(int id, TSimInterface tsi) {
+	  public Train(int id, int speed, TSimInterface tsi) throws CommandException{
 		  this.trainId = id;
 		  this.tsi = tsi;
+		  maxSpeed = speed;
+		  setSpeed(speed);
 	  }
 	  
 	  public void setSpeed(int speed) throws CommandException {
 		  this.speed = speed;
 		  tsi.setSpeed(trainId, speed);
+		
 	  }
 	  
 	  private int getStatus() {
@@ -60,13 +60,23 @@ public class Lab1 {
 		  while (true) {
 			  try {
 				SensorEvent sensor = tsi.getSensor(trainId);
-				switch(Integer.toString(sensor.getXpos()) +
+				switch(Integer.toString(sensor.getXpos()) + "," +
 				       Integer.toString(sensor.getYpos())) {
+				
 				// Train stops, waits, and reverses movement. Falls through for all conditions.
 				case "16,3":
 				case "16,5":
 				case "16,11":
 				case "16,13":
+					if (sensor.getStatus() == 1 && traveling == true) {
+						int status = getStatus() * -1;
+						setSpeed(0);
+						Thread.sleep(1000 + (20 * speed));
+						traveling = false;
+						setSpeed(maxSpeed * status);
+					} else if (sensor.getStatus() == 2 && traveling == false) {
+						traveling = true;
+					}
 					break;
 				
 				// Crossroad cases
