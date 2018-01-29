@@ -102,12 +102,8 @@ public class Lab1 {
          * elements) and train's movement direction (traveling to North or South
          * station).
          * 
-         * @param xPos
-         *            x-Position of the latest active sensor responsible for the
-         *            event
-         * @param yPos
-         *            y-Position of the latest active sensor responsible for the
-         *            event
+         * @param xPos: x-Position of the latest active sensor responsible for the event
+         * @param yPos: y-Position of the latest active sensor responsible for the event
          * @throws CommandException
          * @throws InterruptedException
          */
