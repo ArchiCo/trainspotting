@@ -2,7 +2,6 @@ package trainspotting;
 
 import TSim.*;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Semaphore;
 
 public class Lab1 {
@@ -36,23 +35,6 @@ public class Lab1 {
 		train2.start();
 	}
 	
-	public enum Direction{NORTH, SOUTH};
-	public enum Sensor {
-		N_STATION_N (15, 3), N_STATION_S (15, 5), S_STATION_N (15,11), S_STATION_S (15,13), // Station sensors
-		N_CROSSROAD ( 8, 5), S_CROSSROAD (10, 8), W_CROSSROAD ( 6, 7), E_CROSSROAD (10, 7), // Crossroad sensors
-		N_STATION_LN(14, 7), N_STATION_LS(14, 8), S_STATION_LN( 6,11), S_STATION_LS( 4,13), // Station lane sensors
-		MIDDLE_NW ( 7, 9), MIDDLE_SW ( 7,10), MIDDLE_NE (12, 9), MIDDLE_SE (12,10), // Middle lane sensors
-		SINGLE_LW ( 1, 9), SINGLE_LE (19, 9); // Single Lane sensors
-		private int xPos, yPos;
-		private Sensor(int xPos, int yPos) { this.xPos = xPos; this.yPos = yPos; }
-	}
-	
-	public enum Switch {
-		N_STATION (17, 7), S_STATION ( 3,11), MIDDLE_W ( 4, 9), MIDDLE_E (15, 9);
-		private int xPos, yPos;
-		private Switch(int xPos, int yPos) { this.xPos = xPos; this.yPos = yPos; }
-	}
-	
 	class Train extends Thread {
 		private final int TRAIN_ID;
 		private final int MAXSPEED = 20;
@@ -60,7 +42,7 @@ public class Lab1 {
 		private Direction direction;
 		private SensorEvent previousEvent;
 		private TSimInterface tsi;
-		private List <Semaphore> locks = new ArrayList<Semaphore>();
+		private ArrayList <Semaphore> locks = new ArrayList<Semaphore>();
 
 		public Train(int trainId, int speed, TSimInterface tsi, Direction direction) {
 			TRAIN_ID = trainId;
@@ -166,7 +148,6 @@ public class Lab1 {
 						break;
 						
 					case SINGLE_LW:
-					
 						if (semaphore[3].tryAcquire()) {
 							locks.add(semaphore[3]);
 							tsi.setSwitch(Switch.MIDDLE_W.xPos, Switch.MIDDLE_W.yPos, TSimInterface.SWITCH_LEFT);
@@ -251,5 +232,23 @@ public class Lab1 {
 				semaphore[section].release();
 			}
 		}
+	}
+	
+	public enum Direction{NORTH, SOUTH}; // Directional enumerators
+	
+	public enum Sensor { // Sensor enumerators corresponding to the map sensors
+		N_STATION_N (15, 3), N_STATION_S (15, 5), S_STATION_N (15,11), S_STATION_S (15,13), // Station sensors
+		N_CROSSROAD ( 8, 5), S_CROSSROAD (10, 8), W_CROSSROAD ( 6, 7), E_CROSSROAD (10, 7), // Crossroad sensors
+		N_STATION_LN(14, 7), N_STATION_LS(14, 8), S_STATION_LN( 6,11), S_STATION_LS( 4,13), // Station lane sensors
+		MIDDLE_NW ( 7, 9), MIDDLE_SW ( 7,10), MIDDLE_NE (12, 9), MIDDLE_SE (12,10), // Middle lane sensors
+		SINGLE_LW ( 1, 9), SINGLE_LE (19, 9); // Single Lane sensors
+		private int xPos, yPos;
+		private Sensor(int xPos, int yPos) { this.xPos = xPos; this.yPos = yPos; }
+	}
+	
+	public enum Switch { // Switch enumerators
+		N_STATION (17, 7), S_STATION ( 3,11), MIDDLE_W ( 4, 9), MIDDLE_E (15, 9);
+		private int xPos, yPos;
+		private Switch(int xPos, int yPos) { this.xPos = xPos; this.yPos = yPos; }
 	}
 }
