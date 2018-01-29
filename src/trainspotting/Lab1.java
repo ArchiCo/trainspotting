@@ -4,8 +4,6 @@ import TSim.*;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
-
-
 public class Lab1 {
 	Semaphore[] semaphore = new Semaphore[6];
 	public Lab1(Integer speed1, Integer speed2) {
@@ -71,7 +69,7 @@ public class Lab1 {
 					  if (previousSensorEvent == null || 
 						  currentSensorEvent.getXpos() != previousSensorEvent.getXpos() ||
 						  currentSensorEvent.getYpos() != previousSensorEvent.getYpos()) {
-						  // If so, proceed to assessing sensors
+						  // If so, proceed to assessing behavior according to the active sensor
 						  sensorActivity(currentSensorEvent.getXpos(), currentSensorEvent.getYpos());
 						  previousSensorEvent = currentSensorEvent;
 					  }
@@ -99,52 +97,63 @@ public class Lab1 {
 				int switchDirection;
 				if (movementDirection == Direction.SOUTH) {
 					switch(activeSensor) {
+					// Initial departure from Northern station. 
 					case STATION_NN: case STATION_NS:
-						acquirePriority(Control.STATION_LANE_NN.node);
+						if (activeSensor == Sensor.STATION_NN) { // if on northern lane
+							acquirePriority(Control.STATION_LANE_NN.node); // ensures that it stays reserved 
+						}
 						break;
-						
+					// Entering crossroad
 					case CROSSROAD_W: case CROSSROAD_N:
-						acquirePriority(Control.CROSSROAD.node);
+						acquirePriority(Control.CROSSROAD.node); // ensure it's reserved by the train
 						break;
-						
+					// Exiting crossroad
 					case CROSSROAD_E: case CROSSROAD_S:
 						releaseLock(Control.CROSSROAD.node);
 						break;
-					
+					// Exiting station lanes towards the single lane section
 					case STATION_LANE_NN: case STATION_LANE_NS:
-						acquirePriority(Control.SINGLE_LANE_N.node);
-						switchDirection = (activeSensor == Sensor.STATION_LANE_NN) ? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
-						setSwitch(Switch.STATION_N, switchDirection);
+						acquirePriority(Control.SINGLE_LANE_N.node); // ensure that the lane´s reserved by Train
+						switchDirection = (activeSensor == Sensor.STATION_LANE_NN) // Exiting from N or S?
+								? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
+						setSwitch(Switch.STATION_N, switchDirection); // switch rails accordingly
 						break;
-					
+					// Passing the middle of the single lane
 					case SINGLE_LANE_N:
-						switchDirection = tryAcquiringPriority(Control.FAST_LANE, TSimInterface.SWITCH_RIGHT, TSimInterface.SWITCH_LEFT);
-						setSwitch(Switch.MIDDLE_LANE_E, switchDirection);
-						releaseLock(Control.STATION_LANE_NN.node);
+						switchDirection = tryAcquiringPriority( // attempt to reserve the fast middle lane
+								Control.FAST_LANE,
+								TSimInterface.SWITCH_RIGHT,
+								TSimInterface.SWITCH_LEFT);
+						setSwitch(Switch.MIDDLE_LANE_E, switchDirection); // switch to fast or longer lane
+						releaseLock(Control.STATION_LANE_NN.node); // open access to northern lane
 						break;
-						
+					// Entering middle lane section
 					case MIDDLE_LANE_NE: case MIDDLE_LANE_SE:
-						releaseLock(Control.SINGLE_LANE_N.node);
+						releaseLock(Control.SINGLE_LANE_N.node); // open access to the single lane
 						break;
-						
+					// Exiting middle lane section
 					case MIDDLE_LANE_NW: case MIDDLE_LANE_SW:
-						acquirePriority(Control.SINGLE_LANE_S.node);
-						switchDirection = (activeSensor == Sensor.MIDDLE_LANE_NW) ? TSimInterface.SWITCH_LEFT : TSimInterface.SWITCH_RIGHT;
-						setSwitch(Switch.MIDDLE_LANE_W, switchDirection);
+						acquirePriority(Control.SINGLE_LANE_S.node); // ensure that the lane´s reserved by Train
+						switchDirection = (activeSensor == Sensor.MIDDLE_LANE_NW) // Exiting from N or S?
+								? TSimInterface.SWITCH_LEFT : TSimInterface.SWITCH_RIGHT;
+						setSwitch(Switch.MIDDLE_LANE_W, switchDirection); // switch rails accordingly
 						break;
-						
+					// Passing the middle of the single lane
 					case SINGLE_LANE_S:
-						switchDirection = tryAcquiringPriority(Control.STATION_LANE_SN, TSimInterface.SWITCH_LEFT, TSimInterface.SWITCH_RIGHT);
-						setSwitch(Switch.STATION_S, switchDirection);
-						releaseLock(Control.FAST_LANE.node);
+						switchDirection = tryAcquiringPriority( // attempt to reserve the northern lane
+								Control.STATION_LANE_SN,
+								TSimInterface.SWITCH_LEFT,
+								TSimInterface.SWITCH_RIGHT);
+						setSwitch(Switch.STATION_S, switchDirection); // switch rails to reserved or alt path
+						releaseLock(Control.FAST_LANE.node); // open access to the fast middle lane
 						break;
-						
+					// Entering one of the station lanes
 					case STATION_LANE_SN: case STATION_LANE_SS:
-						releaseLock(Control.SINGLE_LANE_S.node);
+						releaseLock(Control.SINGLE_LANE_S.node); // opening access to the single lane
 						break;
-						
+					// Arriving to the destination	
 					case STATION_SN: case STATION_SS:
-						stationBehavior();
+						stationBehavior(); // Initiate arrival behavior: stop, wait, reserve movement
 						break;	
 						
 					default:
@@ -152,19 +161,28 @@ public class Lab1 {
 					} 
 				
 				} else if (movementDirection == Direction.NORTH){
+					
+					// The procedure for the journey repeats to the previous logic
 					switch(activeSensor) {
+					
 					case STATION_SN: case STATION_SS:
-						acquirePriority(Control.STATION_LANE_SN.node);
+						if (activeSensor == Sensor.STATION_SN) {
+							acquirePriority(Control.STATION_LANE_SN.node);
+						}
 						break;
 					
 					case STATION_LANE_SN: case STATION_LANE_SS:
 						acquirePriority(Control.SINGLE_LANE_S.node);
-						switchDirection = (activeSensor == Sensor.STATION_LANE_SS) ? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
+						switchDirection = (activeSensor == Sensor.STATION_LANE_SS) 
+								? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
 						setSwitch(Switch.STATION_S, switchDirection);
 						break;
 						
 					case SINGLE_LANE_S:
-						switchDirection = tryAcquiringPriority(Control.FAST_LANE, TSimInterface.SWITCH_LEFT, TSimInterface.SWITCH_RIGHT);
+						switchDirection = tryAcquiringPriority(
+								Control.FAST_LANE,
+								TSimInterface.SWITCH_LEFT,
+								TSimInterface.SWITCH_RIGHT);
 						setSwitch(Switch.MIDDLE_LANE_W, switchDirection);
 						releaseLock(Control.STATION_LANE_SN.node);
 						break;
@@ -175,12 +193,16 @@ public class Lab1 {
 					
 					case MIDDLE_LANE_NE: case MIDDLE_LANE_SE:
 						acquirePriority(Control.SINGLE_LANE_N.node);
-						switchDirection = (activeSensor == Sensor.MIDDLE_LANE_NE) ? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
+						switchDirection = (activeSensor == Sensor.MIDDLE_LANE_NE) 
+								? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
 						setSwitch(Switch.MIDDLE_LANE_E, switchDirection);
 						break;	
 						
 					case SINGLE_LANE_N:
-						switchDirection = tryAcquiringPriority(Control.STATION_LANE_NN, TSimInterface.SWITCH_RIGHT, TSimInterface.SWITCH_LEFT);
+						switchDirection = tryAcquiringPriority(
+								Control.STATION_LANE_NN,
+								TSimInterface.SWITCH_RIGHT,
+								TSimInterface.SWITCH_LEFT);
 						setSwitch(Switch.STATION_N, switchDirection);
 						releaseLock(Control.FAST_LANE.node);
 						break;
@@ -208,7 +230,7 @@ public class Lab1 {
 			}
 		}
 		
-		// Rail switch setting command. Encapsulated for a better readability.
+		// Rail switch setting command. Encapsulated for the better code readability in the main body
 		public void setSwitch(Switch railSwitch, int direction) throws CommandException {
 			tsi.setSwitch(railSwitch.xPos, railSwitch.yPos, direction);
 		}
@@ -251,6 +273,8 @@ public class Lab1 {
 			}
 		}
 		
+		// Semaphore and lock acquisition in cases where an alternative path is available if a priority
+		// cannot be secured.
 		private int tryAcquiringPriority(Control semaphore, int acquiredDirection, int alternativeDirection) {
 			if (semaphore.node.tryAcquire()) {
 				locks.add(semaphore.node);
