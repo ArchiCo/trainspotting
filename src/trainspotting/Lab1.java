@@ -101,15 +101,15 @@ public class Lab1 {
 						releaseLock(Semaphores.CROSSROAD.index);
 						break;
 					
-					case NORTH_STATION_LINE_UP: case NORTH_STATION_LINE_DOWN:
-						acquire(Semaphores.NORTH_SINGLE_LANE.index);
-						switchDirection = (activeSensor == Sensor.NORTH_STATION_LINE_UP) ? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
+					case NORTH_STATION_L_UP: case NORTH_STATION_L_DOWN:
+						acquire(Semaphores.NORTH_SINGLE_LINE.index);
+						switchDirection = (activeSensor == Sensor.NORTH_STATION_L_UP) ? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
 						tsi.setSwitch(Switch.NORTH_STATION.xPos, Switch.NORTH_STATION.yPos, switchDirection);
 						break;
 					
 					case NORTH_SINGLE_LINE:
-						if (semaphore[Semaphores.FAST_MIDDLE_LANE.index].tryAcquire()) {
-							locks.add(semaphore[Semaphores.FAST_MIDDLE_LANE.index]);
+						if (semaphore[Semaphores.FAST_MIDDLE_LINE.index].tryAcquire()) {
+							locks.add(semaphore[Semaphores.FAST_MIDDLE_LINE.index]);
 							tsi.setSwitch(Switch.MIDDLE_LINE_EAST.xPos, Switch.MIDDLE_LINE_EAST.yPos, TSimInterface.SWITCH_RIGHT);
 						} else {
 							tsi.setSwitch(Switch.MIDDLE_LINE_EAST.xPos, Switch.MIDDLE_LINE_EAST.yPos, TSimInterface.SWITCH_LEFT);
@@ -118,11 +118,11 @@ public class Lab1 {
 						break;
 						
 					case MIDDLE_LINE_NE: case MIDDLE_LINE_SE:
-						releaseLock(Semaphores.NORTH_SINGLE_LANE.index);
+						releaseLock(Semaphores.NORTH_SINGLE_LINE.index);
 						break;
 						
 					case MIDDLE_LINE_NW: case MIDDLE_LINE_SW:
-						acquire(Semaphores.SOUTH_SINGLE_LANE.index);
+						acquire(Semaphores.SOUTH_SINGLE_LINE.index);
 						switchDirection = (activeSensor == Sensor.MIDDLE_LINE_NW) ? TSimInterface.SWITCH_LEFT : TSimInterface.SWITCH_RIGHT;
 						tsi.setSwitch(Switch.MIDDLE_LINE_WEST.xPos, Switch.MIDDLE_LINE_WEST.yPos, switchDirection);
 						break;
@@ -134,11 +134,11 @@ public class Lab1 {
 						} else {
 							tsi.setSwitch(Switch.SOUTH_STATION.xPos, Switch.SOUTH_STATION.yPos, TSimInterface.SWITCH_RIGHT);
 						}
-						releaseLock(Semaphores.FAST_MIDDLE_LANE.index);
+						releaseLock(Semaphores.FAST_MIDDLE_LINE.index);
 						break;
 						
-					case SOUTH_STATION_LINE_UP: case SOUTH_STATION_LINE_DOWN:
-						releaseLock(Semaphores.SOUTH_SINGLE_LANE.index);
+					case SOUTH_STATION_L_UP: case SOUTH_STATION_L_DOWN:
+						releaseLock(Semaphores.SOUTH_SINGLE_LINE.index);
 						break;
 						
 					case SOUTH_STATION_UP: case SOUTH_STATION_DOWN:
@@ -155,15 +155,15 @@ public class Lab1 {
 						acquire(Semaphores.SOUTH_STATION.index);
 						break;
 					
-					case SOUTH_STATION_LINE_UP: case SOUTH_STATION_LINE_DOWN:
-						acquire(Semaphores.SOUTH_SINGLE_LANE.index);
-						switchDirection = (activeSensor == Sensor.SOUTH_STATION_LINE_DOWN) ? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
+					case SOUTH_STATION_L_UP: case SOUTH_STATION_L_DOWN:
+						acquire(Semaphores.SOUTH_SINGLE_LINE.index);
+						switchDirection = (activeSensor == Sensor.SOUTH_STATION_L_DOWN) ? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
 						tsi.setSwitch(Switch.SOUTH_STATION.xPos, Switch.SOUTH_STATION.yPos, switchDirection);
 						break;
 						
 					case SOUTH_SINGLE_LINE:
-						if (semaphore[Semaphores.FAST_MIDDLE_LANE.index].tryAcquire()) {
-							locks.add(semaphore[Semaphores.FAST_MIDDLE_LANE.index]);
+						if (semaphore[Semaphores.FAST_MIDDLE_LINE.index].tryAcquire()) {
+							locks.add(semaphore[Semaphores.FAST_MIDDLE_LINE.index]);
 							tsi.setSwitch(Switch.MIDDLE_LINE_WEST.xPos, Switch.MIDDLE_LINE_WEST.yPos, TSimInterface.SWITCH_LEFT);
 						} else {
 							tsi.setSwitch(Switch.MIDDLE_LINE_WEST.xPos, Switch.MIDDLE_LINE_WEST.yPos, TSimInterface.SWITCH_RIGHT);
@@ -172,11 +172,11 @@ public class Lab1 {
 						break;
 						
 					case MIDDLE_LINE_NW: case MIDDLE_LINE_SW:
-						releaseLock(Semaphores.SOUTH_SINGLE_LANE.index);
+						releaseLock(Semaphores.SOUTH_SINGLE_LINE.index);
 						break;	
 					
 					case MIDDLE_LINE_NE: case MIDDLE_LINE_SE:
-						acquire(Semaphores.NORTH_SINGLE_LANE.index);
+						acquire(Semaphores.NORTH_SINGLE_LINE.index);
 						switchDirection = (activeSensor == Sensor.MIDDLE_LINE_NE) ? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
 						tsi.setSwitch(Switch.MIDDLE_LINE_EAST.xPos, Switch.MIDDLE_LINE_EAST.yPos, switchDirection);
 						break;	
@@ -188,11 +188,11 @@ public class Lab1 {
 						} else {
 							tsi.setSwitch(Switch.NORTH_STATION.xPos, Switch.NORTH_STATION.yPos, TSimInterface.SWITCH_LEFT);
 						}
-						releaseLock(Semaphores.FAST_MIDDLE_LANE.index);
+						releaseLock(Semaphores.FAST_MIDDLE_LINE.index);
 						break;
 					
-					case NORTH_STATION_LINE_UP: case NORTH_STATION_LINE_DOWN:
-						releaseLock(Semaphores.NORTH_SINGLE_LANE.index);
+					case NORTH_STATION_L_UP: case NORTH_STATION_L_DOWN:
+						releaseLock(Semaphores.NORTH_SINGLE_LINE.index);
 						break;
 						
 					case EAST_CROSSROAD: case SOUTH_CROSSROAD:
@@ -250,7 +250,7 @@ public class Lab1 {
 	}
 	
 	public enum Semaphores{
-		CROSSROAD(0), NORTH_STATION(1), NORTH_SINGLE_LANE(2), FAST_MIDDLE_LANE(3), SOUTH_SINGLE_LANE(4), SOUTH_STATION(5);
+		CROSSROAD(0), NORTH_STATION(1), NORTH_SINGLE_LINE(2), FAST_MIDDLE_LINE(3), SOUTH_SINGLE_LINE(4), SOUTH_STATION(5);
 		private int index;
 		private Semaphores(int index) {this.index = index;}
 	}
@@ -259,14 +259,11 @@ public class Lab1 {
 	
 	public enum Sensor { // Sensor enumerators corresponding to the map sensors
 		// Station sensors
-		NORTH_STATION_UP(15, 3), NORTH_STATION_DOWN(15, 5), 
-		SOUTH_STATION_UP(15,11), SOUTH_STATION_DOWN(15,13),
+		NORTH_STATION_UP(15, 3), NORTH_STATION_DOWN(15, 5), SOUTH_STATION_UP(15,11), SOUTH_STATION_DOWN(15,13),
 		// Crossroad sensors
-		NORTH_CROSSROAD(8,5), SOUTH_CROSSROAD(10,8), 
-		WEST_CROSSROAD (6,7), EAST_CROSSROAD (10,7),
+		NORTH_CROSSROAD(8,5), SOUTH_CROSSROAD(10,8), WEST_CROSSROAD (6,7), EAST_CROSSROAD (10,7),
 		// Station lane sensors
-		NORTH_STATION_LINE_UP(14, 7), NORTH_STATION_LINE_DOWN(14, 8), 
-		SOUTH_STATION_LINE_UP( 6,11), SOUTH_STATION_LINE_DOWN( 4,13), 
+		NORTH_STATION_L_UP(14, 7), NORTH_STATION_L_DOWN(14, 8), SOUTH_STATION_L_UP( 6,11), SOUTH_STATION_L_DOWN( 4,13), 
 		// Middle lane sensors
 		MIDDLE_LINE_NW( 7, 9), MIDDLE_LINE_SW( 7,10), 
 		MIDDLE_LINE_NE(12, 9), MIDDLE_LINE_SE(12,10),
