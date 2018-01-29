@@ -20,7 +20,7 @@ public class Lab1 {
 	}
 	
 	class Train extends Thread {
-		private final int TRAIN_ID, MAXSPEED = 20;
+		private final int TRAIN_ID, MIN_SPEED = 1, MAX_SPEED = 22;
 		private int speed;
 		private Direction movementDirection;
 		private SensorEvent previousSensorEvent;
@@ -36,7 +36,7 @@ public class Lab1 {
 
 		public void run() {
 			try {
-				  tsi.setSpeed(TRAIN_ID, speed);
+				  setSpeed(speed);
 				  while (true) {
 					  SensorEvent currentSensorEvent = tsi.getSensor(TRAIN_ID);
 					  // Confirm if the latest sensor that the train've passed is a new sensor.
@@ -53,22 +53,25 @@ public class Lab1 {
 			}
 	  }
 		
-
 		/*
-		 * The critical sections are as we discussed: 1-2. Northern and Southern
-		 * stations: the semaphore's to control the switch as to prevent the trains
-		 * from entering a lane that's already occupied by a train. 3-4. Northern
-		 * and Southern single lanes that go from the station switches, 'till the
-		 * middle fast lane switch: these sections are critical, because trains
-		 * can't enter and pass them simultaneously without causing a collision. One
-		 * train would have to wait at either side of this 'path' (either waiting on
-		 * the station lane next to the switch, or in the middle lane before the
-		 * crossing train passes. 5. Middle "fast" lane: if one's occupied, then the
-		 * second train needs to be redirected to the other lane. Interestingly
-		 * enough, if one train passes into the 'one lane' section after crossing
-		 * the switch, then the previous behavior (3-4) will be the one governing
-		 * the first train's stop. 6. Crossroad between northern train station
-		 * lanes: one waits, while the other one passes.
+		 * The critical sections are as we discussed: 
+		 * 
+		 * 0. Crossroad between northern train station lanes: one waits, while the other 
+		 * one passes.
+		 * 
+		 * 1 & 5. Northern and Southern stations: the semaphore's to control the switch as
+		 * to prevent the trains from entering a lane that's already occupied by a train. 
+		 * 
+		 * 2 & 4. Northern and Southern single lanes that go from the station switches,´till
+		 * the middle fast lane switch: these sections are critical, because trains can´t
+		 * enter and pass them simultaneously without causing a collision. One train would
+		 * have to wait at either side of this 'path' (either waiting on the station lane
+		 * next to the switch, or in the middle lane before the crossing train passes. 
+		 * 
+		 * 3. Middle "fast" lane: if one's occupied, then the second train needs to be 
+		 * redirected to the other lane. Interestingly enough, if one train passes into 
+		 * the 'one lane' section after crossing the switch, then the previous behavior 
+		 * (3d-4) will be the one governing the first train's stop.
 		 */
 		
 		/**
@@ -89,59 +92,59 @@ public class Lab1 {
 				int switchDirection;
 				if (movementDirection == Direction.SOUTH) {
 					switch(activeSensor) {
-					case NORTH_STATION_UP: case NORTH_STATION_DOWN:
-						acquire(Semaphores.NORTH_STATION.index);
+					case STATION_NN: case STATION_NS:
+						acquirePriority(Control.STATION_LANE_NN.node);
 						break;
 						
-					case WEST_CROSSROAD: case NORTH_CROSSROAD:
-						acquire(Semaphores.CROSSROAD.index);
+					case CROSSROAD_W: case CROSSROAD_N:
+						acquirePriority(Control.CROSSROAD.node);
 						break;
 						
-					case EAST_CROSSROAD: case SOUTH_CROSSROAD:
-						releaseLock(Semaphores.CROSSROAD.index);
+					case CROSSROAD_E: case CROSSROAD_S:
+						releaseLock(Control.CROSSROAD.node);
 						break;
 					
-					case NORTH_STATION_L_UP: case NORTH_STATION_L_DOWN:
-						acquire(Semaphores.NORTH_SINGLE_LINE.index);
-						switchDirection = (activeSensor == Sensor.NORTH_STATION_L_UP) ? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
-						tsi.setSwitch(Switch.NORTH_STATION.xPos, Switch.NORTH_STATION.yPos, switchDirection);
+					case STATION_LANE_NN: case STATION_LANE_NS:
+						acquirePriority(Control.SINGLE_LANE_N.node);
+						switchDirection = (activeSensor == Sensor.STATION_LANE_NN) ? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
+						tsi.setSwitch(Switch.STATION_N.xPos, Switch.STATION_N.yPos, switchDirection);
 						break;
 					
-					case NORTH_SINGLE_LINE:
-						if (semaphore[Semaphores.FAST_MIDDLE_LINE.index].tryAcquire()) {
-							locks.add(semaphore[Semaphores.FAST_MIDDLE_LINE.index]);
-							tsi.setSwitch(Switch.MIDDLE_LINE_EAST.xPos, Switch.MIDDLE_LINE_EAST.yPos, TSimInterface.SWITCH_RIGHT);
+					case SINGLE_LANE_N:
+						if (Control.FAST_LANE.node.tryAcquire()) {
+							locks.add(Control.FAST_LANE.node);
+							tsi.setSwitch(Switch.MIDDLE_LANE_E.xPos, Switch.MIDDLE_LANE_E.yPos, TSimInterface.SWITCH_RIGHT);
 						} else {
-							tsi.setSwitch(Switch.MIDDLE_LINE_EAST.xPos, Switch.MIDDLE_LINE_EAST.yPos, TSimInterface.SWITCH_LEFT);
+							tsi.setSwitch(Switch.MIDDLE_LANE_E.xPos, Switch.MIDDLE_LANE_E.yPos, TSimInterface.SWITCH_LEFT);
 						}
-						releaseLock(Semaphores.NORTH_STATION.index);
+						releaseLock(Control.STATION_LANE_NN.node);
 						break;
 						
-					case MIDDLE_LINE_NE: case MIDDLE_LINE_SE:
-						releaseLock(Semaphores.NORTH_SINGLE_LINE.index);
+					case MIDDLE_LANE_NE: case MIDDLE_LANE_SE:
+						releaseLock(Control.SINGLE_LANE_N.node);
 						break;
 						
-					case MIDDLE_LINE_NW: case MIDDLE_LINE_SW:
-						acquire(Semaphores.SOUTH_SINGLE_LINE.index);
-						switchDirection = (activeSensor == Sensor.MIDDLE_LINE_NW) ? TSimInterface.SWITCH_LEFT : TSimInterface.SWITCH_RIGHT;
-						tsi.setSwitch(Switch.MIDDLE_LINE_WEST.xPos, Switch.MIDDLE_LINE_WEST.yPos, switchDirection);
+					case MIDDLE_LANE_NW: case MIDDLE_LANE_SW:
+						acquirePriority(Control.SINGLE_LANE_S.node);
+						switchDirection = (activeSensor == Sensor.MIDDLE_LANE_NW) ? TSimInterface.SWITCH_LEFT : TSimInterface.SWITCH_RIGHT;
+						tsi.setSwitch(Switch.MIDDLE_LANE_W.xPos, Switch.MIDDLE_LANE_W.yPos, switchDirection);
 						break;
 						
-					case SOUTH_SINGLE_LINE:
-						if (semaphore[Semaphores.SOUTH_STATION.index].tryAcquire()) {
-							locks.add(semaphore[Semaphores.SOUTH_STATION.index]);
-							tsi.setSwitch(Switch.SOUTH_STATION.xPos, Switch.SOUTH_STATION.yPos, TSimInterface.SWITCH_LEFT);
+					case SINGLE_LANE_S:
+						if (Control.STATION_LANE_SN.node.tryAcquire()) {
+							locks.add(Control.STATION_LANE_SN.node);
+							tsi.setSwitch(Switch.STATION_S.xPos, Switch.STATION_S.yPos, TSimInterface.SWITCH_LEFT);
 						} else {
-							tsi.setSwitch(Switch.SOUTH_STATION.xPos, Switch.SOUTH_STATION.yPos, TSimInterface.SWITCH_RIGHT);
+							tsi.setSwitch(Switch.STATION_S.xPos, Switch.STATION_S.yPos, TSimInterface.SWITCH_RIGHT);
 						}
-						releaseLock(Semaphores.FAST_MIDDLE_LINE.index);
+						releaseLock(Control.FAST_LANE.node);
 						break;
 						
-					case SOUTH_STATION_L_UP: case SOUTH_STATION_L_DOWN:
-						releaseLock(Semaphores.SOUTH_SINGLE_LINE.index);
+					case STATION_LANE_SN: case STATION_LANE_SS:
+						releaseLock(Control.SINGLE_LANE_S.node);
 						break;
 						
-					case SOUTH_STATION_UP: case SOUTH_STATION_DOWN:
+					case STATION_SN: case STATION_SS:
 						stationBehavior();
 						break;	
 						
@@ -151,59 +154,59 @@ public class Lab1 {
 				
 				} else if (movementDirection == Direction.NORTH){
 					switch(activeSensor) {
-					case SOUTH_STATION_UP: case SOUTH_STATION_DOWN:
-						acquire(Semaphores.SOUTH_STATION.index);
+					case STATION_SN: case STATION_SS:
+						acquirePriority(Control.STATION_LANE_SN.node);
 						break;
 					
-					case SOUTH_STATION_L_UP: case SOUTH_STATION_L_DOWN:
-						acquire(Semaphores.SOUTH_SINGLE_LINE.index);
-						switchDirection = (activeSensor == Sensor.SOUTH_STATION_L_DOWN) ? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
-						tsi.setSwitch(Switch.SOUTH_STATION.xPos, Switch.SOUTH_STATION.yPos, switchDirection);
+					case STATION_LANE_SN: case STATION_LANE_SS:
+						acquirePriority(Control.SINGLE_LANE_S.node);
+						switchDirection = (activeSensor == Sensor.STATION_LANE_SS) ? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
+						tsi.setSwitch(Switch.STATION_S.xPos, Switch.STATION_S.yPos, switchDirection);
 						break;
 						
-					case SOUTH_SINGLE_LINE:
-						if (semaphore[Semaphores.FAST_MIDDLE_LINE.index].tryAcquire()) {
-							locks.add(semaphore[Semaphores.FAST_MIDDLE_LINE.index]);
-							tsi.setSwitch(Switch.MIDDLE_LINE_WEST.xPos, Switch.MIDDLE_LINE_WEST.yPos, TSimInterface.SWITCH_LEFT);
+					case SINGLE_LANE_S:
+						if (Control.FAST_LANE.node.tryAcquire()) {
+							locks.add(Control.FAST_LANE.node);
+							tsi.setSwitch(Switch.MIDDLE_LANE_W.xPos, Switch.MIDDLE_LANE_W.yPos, TSimInterface.SWITCH_LEFT);
 						} else {
-							tsi.setSwitch(Switch.MIDDLE_LINE_WEST.xPos, Switch.MIDDLE_LINE_WEST.yPos, TSimInterface.SWITCH_RIGHT);
+							tsi.setSwitch(Switch.MIDDLE_LANE_W.xPos, Switch.MIDDLE_LANE_W.yPos, TSimInterface.SWITCH_RIGHT);
 						}
-						releaseLock(Semaphores.SOUTH_STATION.index);
+						releaseLock(Control.STATION_LANE_SN.node);
 						break;
 						
-					case MIDDLE_LINE_NW: case MIDDLE_LINE_SW:
-						releaseLock(Semaphores.SOUTH_SINGLE_LINE.index);
+					case MIDDLE_LANE_NW: case MIDDLE_LANE_SW:
+						releaseLock(Control.SINGLE_LANE_S.node);
 						break;	
 					
-					case MIDDLE_LINE_NE: case MIDDLE_LINE_SE:
-						acquire(Semaphores.NORTH_SINGLE_LINE.index);
-						switchDirection = (activeSensor == Sensor.MIDDLE_LINE_NE) ? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
-						tsi.setSwitch(Switch.MIDDLE_LINE_EAST.xPos, Switch.MIDDLE_LINE_EAST.yPos, switchDirection);
+					case MIDDLE_LANE_NE: case MIDDLE_LANE_SE:
+						acquirePriority(Control.SINGLE_LANE_N.node);
+						switchDirection = (activeSensor == Sensor.MIDDLE_LANE_NE) ? TSimInterface.SWITCH_RIGHT : TSimInterface.SWITCH_LEFT;
+						tsi.setSwitch(Switch.MIDDLE_LANE_E.xPos, Switch.MIDDLE_LANE_E.yPos, switchDirection);
 						break;	
 						
-					case NORTH_SINGLE_LINE:
-						if (semaphore[Semaphores.NORTH_STATION.index].tryAcquire()) {
-							locks.add(semaphore[Semaphores.NORTH_STATION.index]);
-							tsi.setSwitch(Switch.NORTH_STATION.xPos, Switch.NORTH_STATION.yPos, TSimInterface.SWITCH_RIGHT);
+					case SINGLE_LANE_N:
+						if (Control.STATION_LANE_NN.node.tryAcquire()) {
+							locks.add(Control.STATION_LANE_NN.node);
+							tsi.setSwitch(Switch.STATION_N.xPos, Switch.STATION_N.yPos, TSimInterface.SWITCH_RIGHT);
 						} else {
-							tsi.setSwitch(Switch.NORTH_STATION.xPos, Switch.NORTH_STATION.yPos, TSimInterface.SWITCH_LEFT);
+							tsi.setSwitch(Switch.STATION_N.xPos, Switch.STATION_N.yPos, TSimInterface.SWITCH_LEFT);
 						}
-						releaseLock(Semaphores.FAST_MIDDLE_LINE.index);
+						releaseLock(Control.FAST_LANE.node);
 						break;
 					
-					case NORTH_STATION_L_UP: case NORTH_STATION_L_DOWN:
-						releaseLock(Semaphores.NORTH_SINGLE_LINE.index);
+					case STATION_LANE_NN: case STATION_LANE_NS:
+						releaseLock(Control.SINGLE_LANE_N.node);
 						break;
 						
-					case EAST_CROSSROAD: case SOUTH_CROSSROAD:
-						acquire(Semaphores.CROSSROAD.index);
+					case CROSSROAD_E: case CROSSROAD_S:
+						acquirePriority(Control.CROSSROAD.node);
 						break;
 						
-					case WEST_CROSSROAD: case NORTH_CROSSROAD:
-						releaseLock(Semaphores.CROSSROAD.index);
+					case CROSSROAD_W: case CROSSROAD_N:
+						releaseLock(Control.CROSSROAD.node);
 						break;
 						
-					case NORTH_STATION_UP: case NORTH_STATION_DOWN:
+					case STATION_NN: case STATION_NS:
 						stationBehavior();
 						break;
 						
@@ -212,6 +215,16 @@ public class Lab1 {
 					}
 				}
 			}
+		}
+		
+		public void setSpeed(int speed) throws CommandException {
+			if (Math.abs(speed) > MAX_SPEED) {
+				speed = MAX_SPEED * (int) Math.signum(speed);
+			} else if (Math.abs(speed) < MIN_SPEED) {
+				speed = MIN_SPEED * (int) Math.signum(speed);
+			}
+			this.speed = speed;
+			tsi.setSpeed(TRAIN_ID, this.speed);
 		}
 		
 		private Sensor getSensor(int xPos, int yPos) {
@@ -225,58 +238,63 @@ public class Lab1 {
 		
 		private void stationBehavior() throws CommandException, InterruptedException {
 			tsi.setSpeed(TRAIN_ID, 0);
-			//Thread.sleep(1000 + (20 * Math.abs(speed)));
-			Thread.sleep(100);
+			Train.sleep(1000 + (20 * Math.abs(speed)));
+			//Train.sleep(100);
 			movementDirection = (movementDirection == Direction.NORTH) ? Direction.SOUTH : Direction.NORTH;
-			speed = -speed;
-			tsi.setSpeed(TRAIN_ID, speed);
+			setSpeed(-speed);
 		}
 	
-		private void acquire(int section) throws InterruptedException, CommandException {
-			if (!locks.contains(semaphore[section])) {
+		private void acquirePriority(Semaphore semaphore) throws InterruptedException, CommandException {
+			if (!locks.contains(semaphore)) {
 				tsi.setSpeed(TRAIN_ID, 0);
-				semaphore[section].acquire();
-				locks.add(semaphore[section]);
-				tsi.setSpeed(TRAIN_ID, speed);
+				semaphore.acquire();
+				locks.add(semaphore);
+				setSpeed(speed);
 			}
 		}
 		
-		private void releaseLock(int section) {
-			if(locks.contains(semaphore[section])) {
-				locks.remove(semaphore[section]);
-				semaphore[section].release();
+		private void releaseLock(Semaphore semaphore) {
+			if(locks.contains(semaphore)) {
+				locks.remove(semaphore);
+				semaphore.release();
 			}
 		}
 	}
 	
-	public enum Semaphores{
-		CROSSROAD(0), NORTH_STATION(1), NORTH_SINGLE_LINE(2), FAST_MIDDLE_LINE(3), SOUTH_SINGLE_LINE(4), SOUTH_STATION(5);
-		private int index;
-		private Semaphores(int index) {this.index = index;}
+	public enum Control{
+		CROSSROAD(), STATION_LANE_NN(), SINGLE_LANE_N(), FAST_LANE(), SINGLE_LANE_S(), STATION_LANE_SN();
+		private Semaphore node;
+		private Control() {
+			node = new Semaphore(1);
+		}
 	}
 	
 	public enum Direction{NORTH, SOUTH}; // Directional enumerators
 	
 	public enum Sensor { // Sensor enumerators corresponding to the map sensors
 		// Station sensors
-		NORTH_STATION_UP(15, 3), NORTH_STATION_DOWN(15, 5), SOUTH_STATION_UP(15,11), SOUTH_STATION_DOWN(15,13),
+		STATION_NN(15,3), STATION_NS(15,5), STATION_SN(15,11), STATION_SS(15,13),
 		// Crossroad sensors
-		NORTH_CROSSROAD(8,5), SOUTH_CROSSROAD(10,8), WEST_CROSSROAD (6,7), EAST_CROSSROAD (10,7),
+		CROSSROAD_N(8,5), CROSSROAD_S(10,8), CROSSROAD_W(6,7), CROSSROAD_E(10,7),
 		// Station lane sensors
-		NORTH_STATION_L_UP(14, 7), NORTH_STATION_L_DOWN(14, 8), SOUTH_STATION_L_UP( 6,11), SOUTH_STATION_L_DOWN( 4,13), 
+		STATION_LANE_NN(14,7), STATION_LANE_NS(14,8), STATION_LANE_SN(6,11), STATION_LANE_SS(4,13), 
 		// Middle lane sensors
-		MIDDLE_LINE_NW( 7, 9), MIDDLE_LINE_SW( 7,10), 
-		MIDDLE_LINE_NE(12, 9), MIDDLE_LINE_SE(12,10),
+		MIDDLE_LANE_NW(7,9), MIDDLE_LANE_SW(7,10), MIDDLE_LANE_NE(12,9), MIDDLE_LANE_SE(12,10),
 		// Single Lane sensors
-		SOUTH_SINGLE_LINE ( 1, 9), NORTH_SINGLE_LINE (19, 9);
+		SINGLE_LANE_S(1,9), SINGLE_LANE_N (19,9);
 		private int xPos, yPos;
-		private Sensor(int xPos, int yPos) { this.xPos = xPos; this.yPos = yPos; }
+		private Sensor(int xPos, int yPos) { 
+			this.xPos = xPos; 
+			this.yPos = yPos; 
+		}
 	}
 	
 	public enum Switch { // Switch enumerators
-		NORTH_STATION(17,7), SOUTH_STATION(3,11), 
-		MIDDLE_LINE_WEST(4,9), MIDDLE_LINE_EAST(15,9);
+		STATION_N(17,7), STATION_S(3,11), MIDDLE_LANE_W(4,9), MIDDLE_LANE_E(15,9);
 		private int xPos, yPos;
-		private Switch(int xPos, int yPos) { this.xPos = xPos; this.yPos = yPos; }
+		private Switch(int xPos, int yPos) { 
+			this.xPos = xPos; 
+			this.yPos = yPos; 
+		}
 	}
 }
