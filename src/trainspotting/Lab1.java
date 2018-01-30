@@ -38,8 +38,6 @@ public class Lab1 {
     }
   }
   class Train extends Thread {
-	  private int maxSpeed = 15;
-	  private boolean traveling = true;
 	  private int trainId;
 	  private int speed;
 	  private TSimInterface tsi;
@@ -48,7 +46,6 @@ public class Lab1 {
 	  public Train(int id, int speed, TSimInterface tsi) throws CommandException{
 		  this.trainId = id;
 		  this.tsi = tsi;
-		  maxSpeed = speed;
 		  setSpeed(speed);
 		  this.atMiddle = false;
 		  this.atStaion = true;
@@ -76,12 +73,11 @@ public class Lab1 {
 				
 				// Train stops, waits, and reverses movement. Falls through for all conditions.
 				case "16,3": case "16,5": case "16,11": case "16,13":
-					if (sensor.getStatus() == 1&&!atStaion) {
+					if (sensor.getStatus() == 1&&!this.atStaion) {
 						this.atStaion = true;
 						int tmpspeed = speed;
 						setSpeed(0);
-						System.out.println("STATION STOPS");
-						Thread.sleep(1000 + (20 * tmpspeed));
+						Thread.sleep(1000 + (20 * Math.abs(tmpspeed)));
 						setSpeed(-tmpspeed);
 					} 
 					break;
@@ -106,27 +102,21 @@ public class Lab1 {
 							if (!this.atStaion){
 								int tmpSpeed = speed;
 								setSpeed(0);
-								//System.out.println("CROSS STOPS");
 								semaphore[5].acquire();
 								setSpeed(tmpSpeed);
-								//System.out.println("can???"+semaphore[5].availablePermits());
 								}
 								else{
 									semaphore[5].release();
 								} 
-						}
-					
-						
+						}						
 					}
-				break;
-				//the next 2 group of cases are the three roads meet: SSL& NSL
+					break;
 				//SSL
 				case "3,13":case "5,11": // SSL & OL2
 					if (sensor.getStatus() == 1) {
 						if (this.atStaion) {
 							int tmpspeed = this.speed;
 							setSpeed(0);
-							System.out.println("SSL STOPS");
 							semaphore[3].acquire();
 							setSpeed(tmpspeed);
 							semaphore[1].release();
@@ -139,33 +129,33 @@ public class Lab1 {
 							semaphore[3].release();
 						}
 					}
-				break;
+					break;
 				//NSL, almost same as SSL
 				case "15,7": case "15,8": 
 					if (sensor.getStatus() == 1){
 						if(this.atStaion){
 							int tmpspeed = this.speed;
 							setSpeed(0);
-							System.out.println("NSL STOPS");
 							semaphore[2].acquire();
 							setSpeed(tmpspeed);
 							semaphore[0].release();
 							changeSwitch(1, semaphore[4].tryAcquire()?
 									SWITCH_RIGHT:SWITCH_LEFT);
 							changeSwitch(0, (sensor.getXpos()==14&&sensor.getYpos()==9)?
-									SWITCH_LEFT:SWITCH_RIGHT);
+									SWITCH_RIGHT:SWITCH_LEFT);
 							this.atStaion = false;
 						}else {
 							semaphore[2].release();
 						}
+					}else {
+						semaphore[2].release();
 					}
-				break;	 
+					break;	 
 				case "6,9":case "6,10": // OL2 & Middle,LEFT,WEST
 					if (sensor.getStatus() == 1) {
 						if (this.atMiddle) {
 							int tmpspeed = this.speed;
 							setSpeed(0);
-							System.out.println("OL2 WEST MIDDLE LEFT STOP");
 							semaphore[3].acquire();
 							setSpeed(tmpspeed);
 							semaphore[4].release();
@@ -180,13 +170,12 @@ public class Lab1 {
 							this.atMiddle = true;
 						}
 					}
-				break;
+					break;
 				case "14,9": case "14,10":// OL1 & Middle,EAST, RIGHT
 					if (sensor.getStatus()==1) {
 							if(this.atMiddle){
 							int tmpspeed = this.speed;
 							setSpeed(0);
-							System.out.println("ol1 middle east right stop");
 							semaphore[2].acquire();
 							setSpeed(tmpspeed);
 							semaphore[4].release();
@@ -200,14 +189,13 @@ public class Lab1 {
 							this.atMiddle = true;
 						}
 						}
-				break;
+					break;
 				}
 							
 			} catch (CommandException | InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			   
 		  }
 	  }  
   }
