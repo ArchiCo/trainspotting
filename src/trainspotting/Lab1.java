@@ -35,7 +35,7 @@ public class Lab1 {
         // Crossroad sensors
         CROSSROAD_N(9, 5), CROSSROAD_S(10, 8), CROSSROAD_W(6, 7), CROSSROAD_E(10, 7),
         // Station lane sensors
-        STATION_LANE_NN(15, 7), STATION_LANE_NS(15, 8), STATION_LANE_SN(5, 11), STATION_LANE_SS(3, 13),
+        STATION_LANE_NN(15, 7), STATION_LANE_NS(15, 8), STATION_LANE_SN(5, 11), STATION_LANE_SS(4, 13),
         // Middle lane sensors
         MIDDLE_LANE_NW(6, 9), MIDDLE_LANE_SW(6, 10), MIDDLE_LANE_NE(13, 9), MIDDLE_LANE_SE(13, 10),
         // Single Lane sensors
