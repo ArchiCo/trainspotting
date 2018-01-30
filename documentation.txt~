@@ -49,7 +49,7 @@ Program testing was performed using multiple instances of the simulation with di
 
 #1 speed1:  1  speed2:  1  Simulation: 20
 #2 speed1: 22  speed2: 22  Simulation: 20
-#3 speed1:  5  speed2: 10  Simulation: 20
+#3 speed1:  0  speed2: 10  Simulation: 20
 #4 speed1: 17  speed2: 22  Simulation: 10
 #5 speed1: 14  speed2: 20  Simulation:  1
 #6 speed1: 12  speed2: 21  Simulation: 10
