@@ -22,7 +22,7 @@ public class Lab1 {
 
     public enum Control {
         CROSSROAD(), STATION_LANE_NN(), SINGLE_LANE_N(), FAST_LANE(), SINGLE_LANE_S(), STATION_LANE_SN();
-        final Semaphore node;
+        private Semaphore node;
 
         private Control() {
             node = new Semaphore(1);
@@ -33,7 +33,7 @@ public class Lab1 {
         // Station sensors
         STATION_NN(15, 3), STATION_NS(15, 5), STATION_SN(15, 11), STATION_SS(15, 13),
         // Crossroad sensors
-        CROSSROAD_N(8, 5), CROSSROAD_S(10, 8), CROSSROAD_W(6, 7), CROSSROAD_E(10, 7),
+        CROSSROAD_N(9, 5), CROSSROAD_S(10, 8), CROSSROAD_W(6, 6), CROSSROAD_E(11, 7),
         // Station lane sensors
         STATION_LANE_NN(14, 7), STATION_LANE_NS(14, 8), STATION_LANE_SN(6, 11), STATION_LANE_SS(4, 13),
         // Middle lane sensors

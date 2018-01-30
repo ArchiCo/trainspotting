@@ -8,7 +8,7 @@ Date: 2017-01-30
 
 In lab one we control two trains run simultaneously between two stations without colliding, derailing or causing rail switching issues. The control program for train instances is governed by 6 semaphores and 18 sensors. The main function that controls the switching behavior (sensorActivity()) is composed out of two parts, that describe traveling scenarios to the Northern or Southern stations, defined by the movement direction. Merging parts into one switch block was considered, but in the end it was deliberated that doing so would hinder code’s readability. The primary function of used binary semaphores is to assign the right of way to the default or single lanes, controlling the rail switches for alternative paths or making trains stop and wait until the critical section clears out.
 
-Railroad diagram: https://i.imgur.com/q2Tllzt.png
+Railroad diagram: https://puu.sh/zd1An/1074282b95.png
 
 ########## Critical Sections ##########
 
@@ -45,7 +45,7 @@ The maximum speed for trains that was derived through experimentation is 22, tho
  
 ##########      Testing      ##########
 
-Program testing was performed using multiple instances of the simulation with different train speeds. The first conditions that were tested were to identify the constraints and edge cases of our map setup, with train speeds set to 1,1 and MAX_SPEED. Max speed was identified to be 22, though it was noted that speed of 20 performs better in regards to the visual/aesthetic alignment with the map’s imagery. Both instances ran for 20 minutes without any issues. Further testing conditions were altered to have an accelerated simulation speed (set to 1), as well as varied station waiting time, with instances tested with the standard 2 second rule, as well as an altered variant of 100 ms, while running both tests for hours and overnight. In the end, 8 instances that were tested for the longest were:
+Program testing was performed using multiple instances of the simulation with different train speeds. The first conditions that were tested were to identify the constraints and edge cases of our map setup, with train speeds set to 1,1 and MAX_SPEED. Max speed was identified to be 22, though it was noted that speed of 20 performs better in regards to the visual/aesthetic alignment with the map’s imagery. Both instances ran for 20 minutes without any issues. Further testing conditions were altered to have an accelerated simulation speed (set to 1), as well as varied station waiting time, with instances tested with the standard 2 second rule, as well as an altered variant of 100 ms, while running both tests for hours and overnight. In the end, 9 instances that were tested for the longest were:
 
 #1 speed1:  1  speed2:  1  Simulation: 20
 #2 speed1: 22  speed2: 22  Simulation: 20
@@ -55,6 +55,7 @@ Program testing was performed using multiple instances of the simulation with di
 #6 speed1: 12  speed2: 21  Simulation: 10
 #7 speed1:  4  speed2: 14  Simulation: 20
 #8 speed1: 18  speed2: 22  Simulation:  1
+#9 speed1: 22  speed2:  2  Simulation: 20
 
 Testing example: https://puu.sh/zcZyn/81aac28b65.gif
 
