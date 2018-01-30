@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
 public class Lab1 {
-    Semaphore[] semaphore = new Semaphore[6];
 
     public Lab1(Integer speed1, Integer speed2) {
         TSimInterface tsi = TSimInterface.getInstance();
@@ -23,7 +22,7 @@ public class Lab1 {
 
     public enum Control {
         CROSSROAD(), STATION_LANE_NN(), SINGLE_LANE_N(), FAST_LANE(), SINGLE_LANE_S(), STATION_LANE_SN();
-        private Semaphore node;
+        final Semaphore node;
 
         private Control() {
             node = new Semaphore(1);
@@ -79,12 +78,10 @@ public class Lab1 {
                 setSpeed(speed);
                 while (true) {
                     SensorEvent currentSensorEvent = tsi.getSensor(TRAIN_ID);
-                    // Confirm if the latest sensor that the train've passed is
-                    // a new sensor.
+                    // Confirm if the latest sensor that the train've passed is a new sensor.
                     if (previousSensorEvent == null || currentSensorEvent.getXpos() != previousSensorEvent.getXpos()
                             || currentSensorEvent.getYpos() != previousSensorEvent.getYpos()) {
-                        // If so, proceed to assessing behavior according to the
-                        // active sensor
+                        // If so, proceed to assessing behavior according to the active sensor
                         sensorActivity(currentSensorEvent.getXpos(), currentSensorEvent.getYpos());
                         previousSensorEvent = currentSensorEvent;
                     }
@@ -117,7 +114,7 @@ public class Lab1 {
 
                     case STATION_NN: // Initial departure from Northern station.
                     case STATION_NS:
-                        if (activeSensor == Sensor.STATION_NN) { // if on northern lane
+                        if (activeSensor == Sensor.STATION_NN) { // If on northern lane
                             acquirePriority(Control.STATION_LANE_NN.node); // ensures that it stays reserved
                         }
                         break;
