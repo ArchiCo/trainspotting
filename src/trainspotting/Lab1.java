@@ -33,11 +33,11 @@ public class Lab1 {
         // Station sensors
         STATION_NN(15, 3), STATION_NS(15, 5), STATION_SN(15, 11), STATION_SS(15, 13),
         // Crossroad sensors
-        CROSSROAD_N(9, 5), CROSSROAD_S(10, 8), CROSSROAD_W(6, 6), CROSSROAD_E(11, 7),
+        CROSSROAD_N(9, 5), CROSSROAD_S(10, 8), CROSSROAD_W(6, 7), CROSSROAD_E(10, 7),
         // Station lane sensors
-        STATION_LANE_NN(14, 7), STATION_LANE_NS(14, 8), STATION_LANE_SN(6, 11), STATION_LANE_SS(4, 13),
+        STATION_LANE_NN(15, 7), STATION_LANE_NS(15, 8), STATION_LANE_SN(5, 11), STATION_LANE_SS(3, 13),
         // Middle lane sensors
-        MIDDLE_LANE_NW(7, 9), MIDDLE_LANE_SW(7, 10), MIDDLE_LANE_NE(12, 9), MIDDLE_LANE_SE(12, 10),
+        MIDDLE_LANE_NW(6, 9), MIDDLE_LANE_SW(6, 10), MIDDLE_LANE_NE(13, 9), MIDDLE_LANE_SE(13, 10),
         // Single Lane sensors
         SINGLE_LANE_S(1, 9), SINGLE_LANE_N(19, 9);
         private int xPos, yPos;
@@ -59,7 +59,7 @@ public class Lab1 {
     }
 
     class Train extends Thread {
-        private final int TRAIN_ID, MAX_SPEED = 22;
+        private final int TRAIN_ID, MAX_SPEED = 17;
         private int speed;
         private Direction movementDirection;
         private SensorEvent previousSensorEvent;
