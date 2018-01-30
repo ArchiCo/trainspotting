@@ -45,15 +45,15 @@ The maximum speed for trains that was derived through experimentation is 22, tho
  
 ##########      Testing      ##########
 
-Program testing was performed using multiple instances of the simulation with different train speeds. The first conditions that were tested were to identify the constraints and edge cases of our map setup, with train speeds set to 1,1 and MAX_SPEED. Max speed was identified to be 22, though it was noted that speed of 20 performs better in regards to the visual/aesthetic alignment with the map’s imagery. Both instances ran for 20 minutes without any issues. Further testing conditions were altered to have an accelerated simulation speed (set to 1), as well as varied station waiting time, with instances tested with the standard 2 second rule, as well as an altered variant of 100 ms, while running both tests for hours and overnight. In the end, 9 instances that were tested for the longest were:
+Program testing was performed using multiple instances of the simulation with different train speeds. The first conditions that were tested were to identify the constraints and edge cases of our map setup, with train speeds set to 1,1 and MAX_SPEED. Max speed was identified to be 17. Both instances ran for 20 minutes without any issues. Further testing conditions were altered to have an accelerated simulation speed (set to 1), as well as varied station waiting time, with instances tested with the standard 2 second rule, as well as an altered variant of 100 ms, while running both tests for hours and overnight. In the end, 9 instances that were tested for the longest were:
 
 #1 speed1:  1  speed2:  1  Simulation: 20
-#2 speed1: 22  speed2: 22  Simulation: 20
+#2 speed1: 17  speed2: 17  Simulation: 20
 #3 speed1:  5  speed2: 10  Simulation: 20
-#4 speed1: 17  speed2: 22  Simulation: 10
-#5 speed1: 14  speed2: 20  Simulation:  1
-#6 speed1: 12  speed2: 21  Simulation: 10
+#4 speed1: 12  speed2: 17  Simulation: 10
+#5 speed1: 17  speed2: 14  Simulation:  1
+#6 speed1:  9  speed2: 17  Simulation: 10
 #7 speed1:  4  speed2: 14  Simulation: 20
-#8 speed1: 18  speed2: 22  Simulation:  1
-#9 speed1: 22  speed2:  2  Simulation: 20
+#8 speed1: 16  speed2:  8  Simulation:  1
+#9 speed1:  1  speed2: 17  Simulation: 20
 
