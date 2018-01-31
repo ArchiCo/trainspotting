@@ -8,7 +8,7 @@ Date: 2017-01-30
 
 In lab one we control two trains run simultaneously between two stations without colliding, derailing or causing rail switching issues. The control program for train instances is governed by 6 semaphores and 18 sensors. The main function that controls the switching behavior (sensorActivity()) is composed out of two parts, that describe traveling scenarios to the Northern or Southern stations, defined by the movement direction. Merging parts into one switch block was considered, but in the end it was deliberated that doing so would hinder code’s readability. The primary function of used binary semaphores is to assign the right of way to the default or single lanes, controlling the rail switches for alternative paths or making trains stop and wait until the critical section clears out.
 
-Railroad diagram: https://i.imgur.com/iE55GBG.png
+Railroad diagram: https://puu.sh/zdb4g/1badb150c2.png
 
 ########## Critical Sections ##########
 
@@ -41,7 +41,7 @@ To satisfy all required behaviors, we’ve tried sensors closely with the critic
 
 ##########   Maximum speed   ##########
 
-The maximum speed for trains that was derived through experimentation is 22, though the speed of 20 stays more in line with the map's visuals. The speed would be set to maxspeed if the input is larger than 22. 
+The maximum speed for trains that was derived through experimentation is 20, though the speed of 20 stays more in line with the map's visuals. The speed would be set to maxspeed if the input is larger than 22. 
  
 ##########      Testing      ##########
 

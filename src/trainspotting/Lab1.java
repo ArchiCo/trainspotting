@@ -6,12 +6,12 @@ import java.util.concurrent.Semaphore;
 
 public class Lab1 {
 
-    public Lab1(Integer speed1, Integer speed2) {
+    public Lab1(Integer speed1, Integer speed2) throws InterruptedException {
         TSimInterface tsi = TSimInterface.getInstance();
         int trainId1 = 1, trainId2 = 2;
         // Initializing instances of 2 trains which are defined as separate threads and starting them
-        Train train1 = new Train(trainId1, speed1, tsi, Direction.SOUTH);
-        Train train2 = new Train(trainId2, speed2, tsi, Direction.NORTH);
+        Train train1 = new Train(trainId1, speed1, tsi, Direction.SOUTH, Control.STATION_LANE_NN.node);
+        Train train2 = new Train(trainId2, speed2, tsi, Direction.NORTH, Control.STATION_LANE_SN.node);
         train1.start();
         train2.start();
     }
@@ -33,11 +33,11 @@ public class Lab1 {
         // Station sensors
         STATION_NN(15, 3), STATION_NS(15, 5), STATION_SN(15, 11), STATION_SS(15, 13),
         // Crossroad sensors
-        CROSSROAD_N(9, 5), CROSSROAD_S(10, 8), CROSSROAD_W(6, 7), CROSSROAD_E(10, 7),
+        CROSSROAD_N(10, 5), CROSSROAD_S(11, 8), CROSSROAD_W(6, 6), CROSSROAD_E(11, 7),
         // Station lane sensors
-        STATION_LANE_NN(15, 7), STATION_LANE_NS(15, 8), STATION_LANE_SN(5, 11), STATION_LANE_SS(4, 13),
+        STATION_LANE_NN(14, 7), STATION_LANE_NS(14, 8), STATION_LANE_SN(6, 11), STATION_LANE_SS(6, 13),
         // Middle lane sensors
-        MIDDLE_LANE_NW(6, 9), MIDDLE_LANE_SW(6, 10), MIDDLE_LANE_NE(13, 9), MIDDLE_LANE_SE(13, 10),
+        MIDDLE_LANE_NW(7, 9), MIDDLE_LANE_SW(7, 10), MIDDLE_LANE_NE(12, 9), MIDDLE_LANE_SE(12, 10),
         // Single Lane sensors
         SINGLE_LANE_S(1, 9), SINGLE_LANE_N(19, 9);
         private int xPos, yPos;
@@ -59,18 +59,19 @@ public class Lab1 {
     }
 
     class Train extends Thread {
-        private final int TRAIN_ID, MAX_SPEED = 17;
+        private final int TRAIN_ID, MAX_SPEED = 20;
         private int speed;
         private Direction movementDirection;
         private SensorEvent previousSensorEvent;
         private TSimInterface tsi;
         private ArrayList<Semaphore> locks = new ArrayList<Semaphore>();
 
-        public Train(int trainId, int speed, TSimInterface tsi, Direction direction) {
+        public Train(int trainId, int speed, TSimInterface tsi, Direction direction, Semaphore semaphore) throws InterruptedException {
             TRAIN_ID = trainId;
             this.tsi = tsi;
             movementDirection = direction;
             this.speed = speed;
+            semaphore.acquire(1); // Initializing right of way for the priority lane
         }
 
         public void run() {
@@ -111,13 +112,6 @@ public class Lab1 {
                 int switchDirection;
                 if (movementDirection == Direction.SOUTH) {
                     switch (activeSensor) {
-
-                    case STATION_NN: // Initial departure from Northern station.
-                    case STATION_NS:
-                        if (activeSensor == Sensor.STATION_NN) { // If on northern lane
-                            acquirePriority(Control.STATION_LANE_NN.node); // ensures that it stays reserved
-                        }
-                        break;
 
                     case CROSSROAD_W: // Entering crossroad
                     case CROSSROAD_N:
@@ -182,13 +176,6 @@ public class Lab1 {
 
                     // The procedure for the journey repeats to the previous logic
                     switch (activeSensor) {
-
-                    case STATION_SN:
-                    case STATION_SS:
-                        if (activeSensor == Sensor.STATION_SN) {
-                            acquirePriority(Control.STATION_LANE_SN.node);
-                        }
-                        break;
 
                     case STATION_LANE_SN:
                     case STATION_LANE_SS:

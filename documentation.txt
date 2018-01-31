@@ -41,7 +41,7 @@ To satisfy all required behaviors, we’ve tried sensors closely with the critic
 
 ##########   Maximum speed   ##########
 
-The maximum speed for trains that was derived through experimentation is 22, though the speed of 20 stays more in line with the map's visuals. The speed would be set to maxspeed if the input is larger than 22. 
+The maximum speed for trains that was derived through experimentation is 20. The speed would be set to maxspeed if the input is larger than 20. 
  
 ##########      Testing      ##########
 
